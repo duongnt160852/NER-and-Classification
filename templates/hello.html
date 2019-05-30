@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <title>Document</title>
+    <style>
+        .header {
+            height: 50px;
+            display: flex;
+            cursor: pointer;
+        }
+
+        .header div {
+            padding: 15px;
+        }
+
+        .active {
+            background-color: #e7e7e7;
+        }
+
+        .title {
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        .PER{
+            background-color:rgb(249, 108, 98);
+        }
+
+        .LOC{
+            background-color:rgb(23, 175, 193);
+        }
+
+        .ORG{
+            background-color:yellow;
+        }
+
+        .MISC{
+            background-color:chartreuse;
+        }
+
+        .space{
+            margin-right: 5px;
+        }
+
+        .clsResult {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="nav navbar-default header">
+            <div class="active" id="ner">
+                Named Entity Recognition
+            </div>
+            <div id="classi">
+                Text Classsification
+            </div>
+        </div>
+        <div id="content">
+            <div class="ner">
+                <div class="title">
+                    <h1>Named Entity Recognition</h1>
+                </div>
+                <div>
+                    location and classify named entities in text
+                </div>
+                <hr>
+                <div>
+                    <h5><b>Text</b></h5>
+                </div>
+                <div class="row" style="margin: 0px">
+                    <div class="col-md-8" style="padding: 0px">
+                        <form action="">
+                            <textarea name="" id="nerContent" cols="100" rows="8"></textarea>
+                            <div class="text-center">
+                                <input type="button" value="Named Entity Recognition" class="btn btn-success" id="nerSubmit">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div>
+                    <h5><b>NER</b></h5>
+                    <div id="nerResult" style="display: flex; flex-wrap: wrap">
+
+                    </div>
+                </div>
+            </div>
+            <div class="cls" style="display:none">
+                <div class="title">
+                    <h1>Classification</h1>
+                </div>
+                <div>
+                    Vietnamese Text Classification
+                </div>
+                <hr>
+                <div>
+                    <h5><b>Text</b></h5>
+                </div>
+                <div class="row"  style="margin: 0px">
+                    <div class="col-md-8" style="padding: 0px">
+                        <form action="">
+                            <textarea name="" id="clsContent" cols="100" rows="8"></textarea>
+                            <div class="text-center">
+                                <input type="button" value="Classify" class="btn btn-success" id="clsSubmit">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div>
+                    <h5><b>Output</b></h5>
+                    <div class="clsResult">
+                        <div>
+                            <h5 style="color:red;"><b>Nhãn:</b></h5>
+                            <div id="clsResult" style="">
+                            </div>
+                        </div>
+                        <div>
+                            <div>
+                                <h5 style="color:red;"><b>Xác xuất:</b></h5>
+                            </div>
+                            <table class="table table-striped table-bordered">
+                              <thead>
+                                <tr>
+                                  <th>Loại văn bản</th>
+                                  <th>Xác suất</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>Giải trí</td>
+                                  <td id="giaitri"></td>
+                                </tr>
+                                <tr>
+                                  <td>Giáo dục</td>
+                                  <td id="giaoduc"></td>
+                                </tr>
+                                <tr>
+                                  <td>Kinh Doanh</td>
+                                  <td id="kinhdoanh"></td>
+                                </tr>
+                                <tr>
+                                  <td>Pháp luật - Tin tức</td>
+                                  <td id="phapluattintuc"></td>
+                                </tr>
+                                <tr>
+                                  <td>Thế giới</td>
+                                  <td id="thegioi"></td>
+                                </tr><tr>
+                                  <td>Thể thao</td>
+                                  <td id="thethao"></td>
+                                </tr>
+                                <tr>
+                                  <td>Thời sự</td>
+                                  <td id="thoisu"></td>
+                                </tr>
+                                <tr>
+                                  <td>Tư vấn</td>
+                                  <td id="tuvan"></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $("#ner").click(function(){
+            $(this).addClass("active");
+            $("#classi").removeClass("active");
+            $(".ner").css("display","block");
+            $(".cls").css("display","none");
+        });
+
+        $("#classi").click(function(){
+            $(this).addClass("active");
+            $("#ner").removeClass("active");
+            $(".ner").css("display","none");
+            $(".cls").css("display","block");
+        });
+
+        $("#clsSubmit").click(function(){
+
+        });
+        $("#nerSubmit").click(function(){
+            $.ajax({
+                'url' : 'ajax/ner',
+                'data': {
+                    "content": $("#nerContent").val()
+                },
+                'type' : 'POST',
+                success: function (data) {
+                    $("#nerResult").html("");
+                    data=JSON.parse(data);
+                    // console.log(data);
+                    for (var j = 0; j < data[0].length; j++) {
+                        var i=0;
+                        var word="";
+                        var label="";
+                        while(i< data[1][j].length){
+                            word=data[0][j][i][0];
+                            word=word.replace("_"," ");
+                            if (data[1][j][i][0]=="B"){
+                                label=data[1][j][i].substr(2);
+                                i++;
+                                while( i<data[1][j].length && data[1][j][i][0]=="I"){
+                                    word=word+" "+data[0][j][i][0];
+                                    word=word.replace("_"," ");
+                                    i++;
+                                }
+                                word=word.replace("_"," ");
+                                $("#nerResult").append("<div class='space'><div class='text-center'><span  class='"+label+"'>"+label+"</span></div><div class='"+label+"'>"+word+"</div></div>");
+                            }
+                            else{
+                                word=word.replace("_"," ");
+                                $("#nerResult").append("<div class='space'><div style='visibility:hidden'>,</div><div>"+word+"</div></div>");
+                                i++;
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        $("#clsSubmit").click(function(){
+            $(".clsResult").css("display","block");
+            $.ajax({
+                'url' : 'ajax/cls',
+                'data': {
+                    "content": $("#clsContent").val()
+                },
+                'type' : 'POST',
+                success: function (data) {
+                    data=JSON.parse(data);
+                    $("#clsResult").html(data[0]);
+                    $("#giaitri").html(data[1]);
+                    $("#giaoduc").html(data[2]);
+                    $("#kinhdoanh").html(data[3]);
+                    $("#phapluattintuc").html(data[4]);
+                    $("#thegioi").html(data[5]);
+                    $("#thethao").html(data[6]);
+                    $("#thoisu").html(data[7]);
+                    $("#tuvan").html(data[8]);
+
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
